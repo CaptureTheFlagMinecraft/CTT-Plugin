@@ -1,0 +1,14 @@
+name: CTT_Plugin
+main: com.gmail.thesmallterror.CTT_Plugin
+version: 0.1
+commands:
+   startCTT:
+      description: Starts a CTT game.
+      usage: /<command>
+   stopCTT:
+      description: Promptly stops the ongoing CTT game
+      usage: /<command>
+permissions:
+    CTT.op:
+        description: Allows you to operate CTT games
+        default: op
