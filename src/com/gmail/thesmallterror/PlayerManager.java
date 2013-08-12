@@ -11,10 +11,12 @@ import org.bukkit.World;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.MaterialData;
@@ -86,7 +88,41 @@ public class PlayerManager implements Listener {
         master.getServer().broadcastMessage(event.getEntity().getDisplayName() + "has died");
         
         
-        removeAllWoolOnDeath(event);
+        if (isPlaying(event.getEntity()))
+            removeAllWoolOnDeath(event);
+    }
+    
+    private boolean isPlaying(Player play)
+    {
+        return isRed(play) || isBlue(play);
+    }
+    
+    private boolean isRed(Player play)
+    {
+        return redPlayers.contains(play);
+    }
+    
+    private boolean isBlue(Player play)
+    {
+        return bluePlayers.contains(play);
+    }
+    
+    @EventHandler(priority= EventPriority.HIGHEST)
+    public void playerRespawnEvent(PlayerRespawnEvent event)
+    {
+        if (isRed(event.getPlayer()))
+        {
+            event.setRespawnLocation(redSpawn.toLocation(event.getRespawnLocation().getWorld()));;
+            master.getServer().broadcastMessage(event.getPlayer().getDisplayName() +" has respawned in the red base.");
+            
+           
+        }
+        else if (isBlue(event.getPlayer()))
+        {
+            master.getServer().broadcastMessage(event.getPlayer().getDisplayName() +" has respawned in the blue base.");
+            event.setRespawnLocation(blueSpawn.toLocation(event.getRespawnLocation().getWorld()));;
+        }
+        
     }
 
 
@@ -107,6 +143,9 @@ public class PlayerManager implements Listener {
     
     final static Vector blueBottom =  new Vector(-17, 17, 3);
     final static Vector blueTop = new Vector(-14, 19, 13);
+    
+    final static Vector redSpawn = new Vector(-91,17,8);
+    final static Vector blueSpawn = new Vector(-15.5,17,8);
     
     ArrayList<Player> bluePlayers = new ArrayList<>();
     ArrayList<Player> redPlayers = new ArrayList<>();
@@ -143,6 +182,7 @@ public class PlayerManager implements Listener {
                 redPlayers.add(play);
                 setHatColor(play, (short) 14);
                 redTeam.addPlayer(play);
+                play.getInventory().setItemInHand( new ItemStack(Material.IRON_SWORD,1,(short)100));
             }
             else if (isWithin(play,blueBottom,blueTop))
             {
@@ -150,6 +190,7 @@ public class PlayerManager implements Listener {
                 bluePlayers.add(play);
                 setHatColor(play, (short) 11);
                 blueTeam.addPlayer(play);
+                play.getInventory().setItemInHand( new ItemStack(Material.IRON_SWORD,1,(short)100));
             }
             else
             {
@@ -178,10 +219,11 @@ public class PlayerManager implements Listener {
         
         assert team.getPlayers().size() == 0;
         
+        team = commonScoreboard.registerNewTeam(teamName);
         team.setAllowFriendlyFire(false);
         
         
-        return commonScoreboard.registerNewTeam(teamName);
+        return team;
     }
 
 
