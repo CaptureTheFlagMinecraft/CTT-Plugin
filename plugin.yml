@@ -8,6 +8,9 @@ commands:
    stopCTT:
       description: Promptly stops the ongoing CTT game
       usage: /<command>
+   getLoc:
+      description: Promptly stops the ongoing CTT game
+      usage: /<command>
 permissions:
     CTT.op:
         description: Allows you to operate CTT games
