@@ -115,12 +115,17 @@ public class PlayerManager implements Listener {
             event.setRespawnLocation(redSpawn.toLocation(event.getRespawnLocation().getWorld()));;
             master.getServer().broadcastMessage(event.getPlayer().getDisplayName() +" has respawned in the red base.");
             
+            setHatColor(event.getPlayer(), (short) 14);
+            giveSword(event.getPlayer());
            
         }
         else if (isBlue(event.getPlayer()))
         {
             master.getServer().broadcastMessage(event.getPlayer().getDisplayName() +" has respawned in the blue base.");
             event.setRespawnLocation(blueSpawn.toLocation(event.getRespawnLocation().getWorld()));;
+            
+            setHatColor(event.getPlayer(), (short) 11);
+            giveSword(event.getPlayer());
         }
         
     }
@@ -180,17 +185,24 @@ public class PlayerManager implements Listener {
             {
                 master.getServer().broadcastMessage(play.getName() + " is in the " + ChatColor.RED + "red base");
                 redPlayers.add(play);
+                
+                play.getInventory().clear();
+                
                 setHatColor(play, (short) 14);
                 redTeam.addPlayer(play);
-                play.getInventory().setItemInHand( new ItemStack(Material.IRON_SWORD,1,(short)100));
+                
+                giveSword(play);
             }
             else if (isWithin(play,blueBottom,blueTop))
             {
                 master.getServer().broadcastMessage(play.getName() + " is in the " + ChatColor.BLUE + "blue base");
                 bluePlayers.add(play);
-                setHatColor(play, (short) 11);
+                
+                play.getInventory().clear();
+                
                 blueTeam.addPlayer(play);
-                play.getInventory().setItemInHand( new ItemStack(Material.IRON_SWORD,1,(short)100));
+                setHatColor(play, (short) 11);
+                giveSword(play);
             }
             else
             {
@@ -202,6 +214,17 @@ public class PlayerManager implements Listener {
             
         }
         
+    }
+
+
+
+
+
+
+
+    private void giveSword(Player play) {
+        play.getInventory().setHeldItemSlot(0);
+        play.getInventory().setItemInHand( new ItemStack(Material.IRON_SWORD,1));
     }
 
 
