@@ -70,9 +70,13 @@ public class PlayerManager implements Listener {
     @EventHandler
     public void playerDropItemEvent(PlayerDropItemEvent event)
     {
-        master.getServer().broadcastMessage("Sometime was dropped");
+       
         
-        
+        if (event.getItemDrop().getItemStack().getTypeId() == Material.WOOL.getId())
+        {
+            master.getServer().broadcastMessage("someone tried dropping wool");
+            event.getItemDrop().remove();
+        }
     }
     
     
@@ -81,6 +85,13 @@ public class PlayerManager implements Listener {
     {
         master.getServer().broadcastMessage(event.getEntity().getDisplayName() + "has died");
         
+        
+        removeAllWoolOnDeath(event);
+    }
+
+
+
+    private void removeAllWoolOnDeath(PlayerDeathEvent event) {
         for (Iterator<ItemStack> it = event.getDrops().iterator(); it.hasNext();)
         {
             ItemStack drop = it.next();
@@ -110,19 +121,35 @@ public class PlayerManager implements Listener {
         redPlayers.clear();
         bluePlayers.clear();
         
+        Scoreboard commonScoreboard = master.getServer().getScoreboardManager().getMainScoreboard();
+        
+        
+        Team redTeam =  getTeamWithOverride(commonScoreboard, "red-ctt");
+        Team blueTeam = getTeamWithOverride(commonScoreboard, "blue-ctt");
+        
+        
+        redTeam.setDisplayName("Red Team");
+        redTeam.setPrefix("Red-");
+        
+        blueTeam.setDisplayName("Blue Team");
+        blueTeam.setPrefix("Blue-");
+        
+        
         for (Player play : players)
         {
             if (isWithin(play, redBottom, redTop))
             {
                 master.getServer().broadcastMessage(play.getName() + " is in the " + ChatColor.RED + "red base");
                 redPlayers.add(play);
-                setHatColor(play, DyeColor.RED);
+                setHatColor(play, (short) 14);
+                redTeam.addPlayer(play);
             }
             else if (isWithin(play,blueBottom,blueTop))
             {
                 master.getServer().broadcastMessage(play.getName() + " is in the " + ChatColor.BLUE + "blue base");
                 bluePlayers.add(play);
-                setHatColor(play, DyeColor.BLUE);
+                setHatColor(play, (short) 11);
+                blueTeam.addPlayer(play);
             }
             else
             {
@@ -138,14 +165,34 @@ public class PlayerManager implements Listener {
 
 
 
+
+
+
+
+    private Team getTeamWithOverride(Scoreboard commonScoreboard, String teamName) {
+        Team team = commonScoreboard.getTeam(teamName);
+        if (team != null)
+        {
+            team.unregister();
+        }
+        
+        assert team.getPlayers().size() == 0;
+        
+        team.setAllowFriendlyFire(false);
+        
+        
+        return commonScoreboard.registerNewTeam(teamName);
+    }
+
+
+
     
     
 
 
-    private void setHatColor(Player player, DyeColor color) {
+    private void setHatColor(Player player, short color) {
         PlayerInventory inv = player.getInventory();
-        Wool f = new Wool(color);
-        inv.setHelmet(f.toItemStack());
+        inv.setHelmet(new ItemStack(Material.WOOL,1,color));
     }
 
 
